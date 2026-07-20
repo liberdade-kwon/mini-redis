@@ -61,3 +61,7 @@ CodeCrafters 스타일 학습 프로젝트다. Claude는 CodeCrafters의 역할(
 - NIC 인터럽트 → 커널 프로토콜 스택 → 소켓 버퍼 → epoll 콜백 → epoll_wait 기상 → read()의 전체 수신 경로
 - Redis가 싱글 스레드 + 멀티플렉싱을 택한 설계 이유 (락 없는 원자성, 메모리 바운드 워크로드)
 - Redis의 예외적 멀티스레딩: fork 기반 RDB/COW, lazy free, io-threads의 역할 범위
+- (Stage 1에서 체득) TCP 스트림 무경계성: write 횟수 ≠ read 횟수, 프레이밍은 프로토콜 책임
+- (Stage 1에서 체득) RESP 기초: \r\n 구분자 + $길이 명시의 이중 프레이밍, binary-safe 개념, inline command
+- (Stage 1에서 체득) 정상 종료(FIN→read -1/null) vs 비정상 종료(RST→SocketException)의 구분과 방어
+- (Stage 1에서 체득) 리소스 수명 관리: use 블록 범위 = 대화 범위, 클라이언트 사고와 서버 수명의 격리

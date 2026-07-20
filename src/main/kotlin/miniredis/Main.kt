@@ -1,7 +1,9 @@
 package miniredis
 
+import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
+import java.net.SocketException
 
 /**
  * mini-redis 진입점.
@@ -18,17 +20,24 @@ fun main(args: Array<String>) {
 
     // TODO: Stage 1 — 여기부터 구현
     val socket = ServerSocket(port)
-    val client = socket.accept()
 
     while (true) {
-        val request = ByteArray(1024)
-        val inputStream = client.getInputStream()
-        inputStream.read(request)
-        println(request.decodeToString())
+        val client = socket.accept()
 
-        val outputStream = client.getOutputStream()
-        val response = "+PONG\r\n"
-        outputStream.write(response.toByteArray())
-        outputStream.flush()
+        client.use {
+            val bufferedReader = it.getInputStream().bufferedReader()
+            val bufferedWriter = it.getOutputStream().bufferedWriter()
+            try {
+                while (true) {
+                    val request = bufferedReader.readLine() ?: break
+                    if (request == "PING") {
+                        bufferedWriter.write("+PONG\r\n")
+                        bufferedWriter.flush()
+                    }
+                }
+            } catch (ex: SocketException) {
+
+            }
+        }
     }
 }

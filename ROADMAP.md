@@ -10,7 +10,7 @@
 
 ## Module A — 기초 & 이벤트 루프 (Redis의 뼈대)
 
-- [ ] **Stage 1. TCP 서버 + PING/PONG**
+- [x] **Stage 1. TCP 서버 + PING/PONG** ✅ 2026-07-20 통과 (클라우드 테스트 6/6)
       6379 포트 바인드, `PING`에 `+PONG\r\n` 응답. 이 단계만 블로킹 I/O 허용.
 - [ ] **Stage 2. 이벤트 루프 전환 (핵심 스테이지)**
       java.nio `Selector` 기반 싱글 스레드로 재작성. 다중 클라이언트 동시 처리.

@@ -65,3 +65,9 @@ CodeCrafters 스타일 학습 프로젝트다. Claude는 CodeCrafters의 역할(
 - (Stage 1에서 체득) RESP 기초: \r\n 구분자 + $길이 명시의 이중 프레이밍, binary-safe 개념, inline command
 - (Stage 1에서 체득) 정상 종료(FIN→read -1/null) vs 비정상 종료(RST→SocketException)의 구분과 방어
 - (Stage 1에서 체득) 리소스 수명 관리: use 블록 범위 = 대화 범위, 클라이언트 사고와 서버 수명의 격리
+- (Stage 2에서 체득) Selector↔epoll 1:1 대응 (open/register/select/selectedKeys = create/ctl/wait/ready list)
+- (Stage 2에서 체득) ready list에는 명단(메타정보)만, 데이터는 소켓별 수신 버퍼 — 복사 2단계 구분
+- (Stage 2에서 체득) OP_ACCEPT와 OP_READ는 다른 시점의 다른 사건 (둘 다 커널의 EPOLLIN)
+- (Stage 2에서 체득) 이벤트 루프의 fd별 순차 처리 = 락 없는 원자성의 코드적 실체
+- (Stage 2에서 체득) select/poll(무상태 O(n)) vs epoll(커널 상태유지+콜백) vs io_uring(completion, SQ/CQ 공유 링)
+- (Stage 2에서 체득) 스레드-퍼-소켓 vs 이벤트 루프: 깨우기는 동일, 대기 주체의 비용과 문맥 교환이 차이

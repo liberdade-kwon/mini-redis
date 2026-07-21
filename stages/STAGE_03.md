@@ -62,6 +62,57 @@ Stage 2의 `if (idx == -1) break`와 같은 원리를 프로토콜 전체로 확
    (bulk 데이터 한가운데에서 잘리는 경우 포함!)
 8. 파서를 별도 파일(예: `Resp.kt`)로 분리해볼 것 — main이 커지기 시작하는 시점이다
 
+## 구현 가이드
+
+### 수도코드 뼈대
+
+전체 구조. `※` 표시가 여러분이 설계할 알맹이다.
+
+```
+// Resp.kt (새 파일 추천)
+object Resp {
+    // 반환: 파싱된 명령(List<String>) or null(데이터 부족 — acc는 건드리지 않음)
+    fun tryParse(acc: StringBuilder): List<String>? {
+        var pos = 0
+        // ※ '*' 로 시작하는지 확인, \r\n까지에서 원소 개수 n 읽기 (없으면 null)
+        // ※ n번 반복:
+        //      '$' 확인, \r\n까지에서 길이 len 읽기 (없으면 null)
+        //      acc에 (데이터 len바이트 + \r\n 2바이트)가 다 있는지 확인 (없으면 null)
+        //      len바이트를 원소로 잘라내고 pos 전진
+        // ※ 전부 성공했을 때만: acc.delete(0, pos) 후 원소 리스트 반환
+    }
+}
+
+// Main.kt의 isReadable 분기 — 기존 줄 단위 while을 이렇게 교체
+acc.append(text)
+while (true) {
+    val command = Resp.tryParse(acc) ?: break     // 부족하면 다음 READ 이벤트까지 대기
+    val reply = execute(command)                   // 아래 함수
+    clientChannel.write(ByteBuffer.wrap(reply.toByteArray()))
+}
+
+// 명령 디스패치 — Stage 4에서 SET/GET이 여기 추가된다
+fun execute(parts: List<String>): String =
+    when (parts[0].uppercase()) {
+        "PING" -> "+PONG\r\n"
+        "ECHO" -> /* ※ bulk string 응답 조립: $길이\r\n데이터\r\n (길이는 바이트!) */
+        else   -> "-ERR unknown command '${parts[0]}'\r\n"
+    }
+```
+
+### API 치트시트 (이번 스테이지에서 처음 쓰는 것들)
+
+| API | 하는 일 | 주의점 |
+|---|---|---|
+| `sb.startsWith("*")` | StringBuilder가 특정 문자(열)로 시작하는지 | pos 기준 확인이 필요하면 `sb[pos] == '*'` 처럼 인덱싱 |
+| `sb[i]` | i번째 문자 | 범위 밖이면 예외 — 길이 확인 먼저 (`i < sb.length`) |
+| `sb.indexOf("\r\n", pos)` | pos부터 검색해 위치 반환, 없으면 -1 | 두 번째 인자로 **검색 시작점**을 줄 수 있다 — 파서에서 핵심 |
+| `sb.substring(from, to)` | [from, to) 구간을 String으로 | acc에서 제거되지는 않음 (Stage 2에서 배운 그것) |
+| `str.toIntOrNull()` | "12" → 12, 실패 시 null | `*abc` 같은 오염 데이터 방어에 유용 |
+| `str.uppercase()` | 대문자화 | 명령 이름 대소문자 무관 처리용 |
+| `str.toByteArray().size` | **바이트** 길이 | `str.length`(문자 수)와 다르다! 한글 "가"는 length 1, 바이트 3. ECHO 응답의 $길이는 반드시 이것 |
+| `sb.delete(0, pos)` | 앞에서 pos개 문자 제거 | 성공 확정 후에만 호출 — "부족하면 소비하지 말 것" 계약 |
+
 ## 자가 테스트
 
 ```bash

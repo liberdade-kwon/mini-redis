@@ -15,9 +15,10 @@
 - [x] **Stage 2. 이벤트 루프 전환 (핵심 스테이지)** ✅ 2026-07-21 통과 (5/5 + Stage 1 회귀 6/6)
       java.nio `Selector` 기반 싱글 스레드로 재작성. 다중 클라이언트 동시 처리.
       → 실제 Redis 비교: `ae.c`, `ae_epoll.c` / `ae_kqueue.c`
-- [ ] **Stage 3. RESP 프로토콜 파서 + ECHO**
+- [x] **Stage 3. RESP 프로토콜 파서 + ECHO** ✅ 2026-07-22 통과 (8/8 + 회귀 5/5)
       RESP array/bulk string 파싱. **partial read**(명령이 여러 패킷에 쪼개져 오는 경우) 처리.
       → 비교: `networking.c`의 `readQueryFromClient()`, 클라이언트별 query buffer
+      ⚠️ 알려진 한계(의도된 연기): String 누적이라 non-ASCII bulk의 바이트 길이가 어긋남 → ByteArray 전환은 Stage 13 전에
 - [ ] **Stage 4. SET / GET + 명령 테이블**
       HashMap 키스페이스, 명령 이름 → 핸들러 함수 디스패치 구조.
       → 비교: `server.c`의 command table, `t_string.c`

@@ -87,3 +87,8 @@ CodeCrafters 스타일 학습 프로젝트다. Claude는 CodeCrafters의 역할(
 - (Stage 2에서 체득) 이벤트 루프의 fd별 순차 처리 = 락 없는 원자성의 코드적 실체
 - (Stage 2에서 체득) select/poll(무상태 O(n)) vs epoll(커널 상태유지+콜백) vs io_uring(completion, SQ/CQ 공유 링)
 - (Stage 2에서 체득) 스레드-퍼-소켓 vs 이벤트 루프: 깨우기는 동일, 대기 주체의 비용과 문맥 교환이 차이
+- (Stage 3에서 체득) RESP 이중 프레이밍 구현: 구조는 \r\n 구분자, 데이터는 $len 길이 기반 (binary-safe)
+- (Stage 3에서 체득) try-parse/커밋 패턴: 파싱 중 pos만 전진, 성공 시에만 delete(0,pos) — 트랜잭션 유추
+- (Stage 3에서 체득) "부족하면 소비하지 말 것" 계약과 재파싱 비용 (Redis는 multibulklen/bulklen에 상태 저장)
+- (Stage 3에서 체득) ByteBuffer의 position 커서 = partial write 대비 장부, wrap(무복사) vs allocate
+- ⚠️ 미해결 부채: 누적 버퍼가 String이라 non-ASCII bulk의 바이트 길이 어긋남 — Stage 13(RDB) 전에 ByteArray 전환 필요

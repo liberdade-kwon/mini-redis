@@ -7,6 +7,7 @@ import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 
+
 /**
  * mini-redis 진입점.
  *
@@ -62,14 +63,9 @@ fun main(args: Array<String>) {
                             acc.append(text)
 
                             while (true) {
-                                val idx = acc.indexOf("\n")
-                                if (idx == -1) break                     // 완성된 줄 없음 → 여기서 멈추고
-                                // 나머지는 acc에 남긴 채 다음 READ 이벤트를 기다림
-                                val line = acc.substring(0, idx)         // 완성된 줄 하나 (끝에 \r 붙어있을 수 있음)
-                                acc.delete(0, idx + 1)                   // 꺼낸 만큼 acc에서 실제로 제거 (\n까지 포함해서 +1)
-                                if (line.trim() == "PING") {             // \r 제거 후 비교 — 어제 배운 그것
-                                    clientChannel.write(ByteBuffer.wrap("+PONG\r\n".toByteArray()))
-                                }
+                                val command = Resp.tryParse(acc) ?: break
+                                val reply = execute(command)
+                                clientChannel.write(ByteBuffer.wrap(reply.toByteArray()))
                             }
                         }
                     }
@@ -80,3 +76,14 @@ fun main(args: Array<String>) {
         }
     }
 }
+
+fun execute(parts: List<String>): String =
+    when (parts[0].uppercase()) {
+        "PING" -> "+PONG\r\n"
+        "ECHO" -> {
+            val msg = parts[1]
+            val len = msg.toByteArray().size    // 문자 수 아닌 바이트 수 (치트시트의 그 함정)
+            "\$$len\r\n$msg\r\n"                // Kotlin에서 $ 문자는 \$로 이스케이프
+        }
+        else   -> "-ERR unknown command '${parts[0]}'\r\n"
+    }

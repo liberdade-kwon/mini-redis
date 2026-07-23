@@ -91,4 +91,8 @@ CodeCrafters 스타일 학습 프로젝트다. Claude는 CodeCrafters의 역할(
 - (Stage 3에서 체득) try-parse/커밋 패턴: 파싱 중 pos만 전진, 성공 시에만 delete(0,pos) — 트랜잭션 유추
 - (Stage 3에서 체득) "부족하면 소비하지 말 것" 계약과 재파싱 비용 (Redis는 multibulklen/bulklen에 상태 저장)
 - (Stage 3에서 체득) ByteBuffer의 position 커서 = partial write 대비 장부, wrap(무복사) vs allocate
+- (Stage 4에서 체득) 공유 키스페이스에 락 불필요 = 이벤트 루프 순차 실행의 실증 (이론→코드)
+- (Stage 4에서 체득) 명령 테이블: 함수를 값으로(핸들러 람다), lookup + arity 검증 = Redis lookupCommand/processCommand
 - ⚠️ 미해결 부채: 누적 버퍼가 String이라 non-ASCII bulk의 바이트 길이 어긋남 — Stage 13(RDB) 전에 ByteArray 전환 필요
+- ⚠️ 미해결 부채: 응답 bulk 조립도 .length(문자 수) 사용 중 — 위 ByteArray 전환 때 함께 바이트 길이로 통일
+- 참고: 회귀 테스트가 "낡아서" 깨질 수 있음 (예: SET이 실명령이 되면 Stage 3의 SET name PING→-ERR 케이스는 +OK가 정답). 회귀 실패 시 진짜 회귀인지 낡은 기대값인지 먼저 판별할 것

@@ -64,7 +64,7 @@ fun main(args: Array<String>) {
 
                             while (true) {
                                 val command = Resp.tryParse(acc) ?: break
-                                val reply = execute(command)
+                                val reply = Commands.execute(command)
                                 clientChannel.write(ByteBuffer.wrap(reply.toByteArray()))
                             }
                         }
@@ -77,13 +77,4 @@ fun main(args: Array<String>) {
     }
 }
 
-fun execute(parts: List<String>): String =
-    when (parts[0].uppercase()) {
-        "PING" -> "+PONG\r\n"
-        "ECHO" -> {
-            val msg = parts[1]
-            val len = msg.toByteArray().size    // 문자 수 아닌 바이트 수 (치트시트의 그 함정)
-            "\$$len\r\n$msg\r\n"                // Kotlin에서 $ 문자는 \$로 이스케이프
-        }
-        else   -> "-ERR unknown command '${parts[0]}'\r\n"
-    }
+

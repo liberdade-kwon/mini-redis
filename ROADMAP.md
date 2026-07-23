@@ -19,7 +19,7 @@
       RESP array/bulk string 파싱. **partial read**(명령이 여러 패킷에 쪼개져 오는 경우) 처리.
       → 비교: `networking.c`의 `readQueryFromClient()`, 클라이언트별 query buffer
       ⚠️ 알려진 한계(의도된 연기): String 누적이라 non-ASCII bulk의 바이트 길이가 어긋남 → ByteArray 전환은 Stage 13 전에
-- [ ] **Stage 4. SET / GET + 명령 테이블**
+- [x] **Stage 4. SET / GET + 명령 테이블** ✅ 2026-07-23 통과 (9/9)
       HashMap 키스페이스, 명령 이름 → 핸들러 함수 디스패치 구조.
       → 비교: `server.c`의 command table, `t_string.c`
 - [ ] **Stage 5. TTL — lazy expiration**
